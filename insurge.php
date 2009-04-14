@@ -23,6 +23,10 @@ class insurge {
 	 * This function prepares Locum for activity.
 	 */
 	public function __construct() {
+		if (function_exists('insurge_constructor_override')) {
+		  insurge_constructor_override($this);
+		  return;
+		}
 		
 		ini_set('memory_limit','128M');
 		$this->insurge_config = parse_ini_file('config/insurge.ini', true);

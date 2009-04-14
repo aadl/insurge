@@ -1,0 +1,4 @@
+Sid_M: committed 4/14/2009
+
+insurge.php:
+  --modified __construct so it calls insurge_constructor_override() if it exists. Allows modification of class on instantiation.
