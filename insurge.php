@@ -33,7 +33,7 @@ class insurge {
 
 		// Take care of requirements
 		require_once('MDB2.php');
-		require($this->insurge_config[insurge_config][dsn_file]);
+		require($this->insurge_config['insurge_config']['dsn_file']);
 		$this->dsn = $dsn;
 	}
 

@@ -25,7 +25,7 @@ class insurge_client extends insurge {
 	 */
 	public function submit_tags($uid, $bnum, $tag_string) {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		$tag_arr = self::prepare_tag_string($tag_string);
 		
 		$dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
@@ -53,7 +53,7 @@ class insurge_client extends insurge {
 	 */
 	public function get_tag_totals($uid = NULL, $bnum_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC') {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		$where_prefix = 'WHERE';
 		if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
 		if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
@@ -70,7 +70,7 @@ class insurge_client extends insurge {
 	
 	public function get_tagged_items($uid = NULL, $tag_name = NULL, $limit = 500, $offset = 0) {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		$where_prefix = 'WHERE';
 		if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
 		if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
@@ -78,13 +78,13 @@ class insurge_client extends insurge {
 		
 		$sql = 'SELECT count(*) FROM insurge_tags ' . $where_str;
 		$dbq = $db->query($sql);
-		$tag_result[total] = $dbq->fetchOne();
+		$tag_result['total'] = $dbq->fetchOne();
 		
 		$sql = 'SELECT bnum FROM insurge_tags ' . $where_str;
 		if ($limit) { $sql .= " LIMIT $limit"; }
 		if ($offset) { $sql .= " OFFSET $offset"; }
 		$result =& $db->query($sql);
-		$tag_result[bnums] = $result->fetchCol();
+		$tag_result['bnums'] = $result->fetchCol();
 		return $tag_result;
 	}
 	
@@ -161,7 +161,7 @@ class insurge_client extends insurge {
 
 	function delete_user_tag($uid, $tag, $bnum = NULL) {
 		if ($uid && $tag) {
-			$group_id = $this->insurge_config[repository_info][group_id];
+			$group_id = $this->insurge_config['repository_info']['group_id'];
 			$db =& MDB2::connect($this->dsn);
 			$tag = $db->quote($tag);
 			$sql = "DELETE FROM insurge_tags WHERE uid = $uid AND group_id = '$group_id' AND tag = $tag";
@@ -179,7 +179,7 @@ class insurge_client extends insurge {
 	 */
 	function submit_rating($uid, $bnum, $value) {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		if ($group_id) {
 			$repos_id = $group_id . '-' . $next_tid;
 		}
@@ -211,21 +211,21 @@ class insurge_client extends insurge {
 	 */
 	function get_rating($bnum, $local_only = FALSE) {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		$sql = 'SELECT AVG(rating) AS rating, COUNT(rate_id) AS rate_count FROM insurge_ratings WHERE bnum = ' . $bnum;
 		if ($local_only) {
 			$sql .= ' AND group_id = "' . $group_id . '"';
 		}
 		$dbq =& $db->query($sql);
 		$avg_rating = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC);
-		$rating[count] = $avg_rating[rate_count];
+		$rating['count'] = $avg_rating['rate_count'];
 		
-		if($avg_rating[rating] >= ($half = ($ceil = ceil($avg_rating[rating]))- 0.5) + 0.25) {
-			$rating[value] = $ceil;
-		} else if ($avg_rating[rating] < $half - 0.25) {
-			$rating[value] = floor($avg_rating[rating]);
+		if($avg_rating['rating'] >= ($half = ($ceil = ceil($avg_rating['rating']))- 0.5) + 0.25) {
+			$rating['value'] = $ceil;
+		} else if ($avg_rating['rating'] < $half - 0.25) {
+			$rating['value'] = floor($avg_rating['rating']);
 		} else {
-			$rating[value] = $half;
+			$rating['value'] = $half;
 		}
 		return $rating;
 	}
@@ -233,16 +233,16 @@ class insurge_client extends insurge {
 	function get_rating_list($uid = NULL, $bnum = NULL, $limit = 20, $offset = 0, $order = 'ORDER BY rating DESC') {
 		$db =& MDB2::connect($this->dsn);
 		$offset = $offset ? $offset : 0;
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
 		if ($bnum) { $where_str .= ' ' . $where_prefix . ' bnum = ' . $bnum . ' '; $where_prefix = 'AND'; }
 		if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
 		$sql = 'SELECT count(*) FROM insurge_ratings WHERE ' . $where_str;
 		$dbq = $db->query($sql);
-		$ratings_arr[total] = $dbq->fetchOne();
+		$ratings_arr['total'] = $dbq->fetchOne();
 		$sql = 'SELECT rating, rate_id, bnum, UNIX_TIMESTAMP(rate_date) AS rate_date FROM insurge_ratings WHERE ' . $where_str . ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$dbq =& $db->query($sql);
-		$ratings_arr[ratings] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+		$ratings_arr['ratings'] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
 		return $ratings_arr;
 	}
 
@@ -255,7 +255,7 @@ class insurge_client extends insurge {
 	 * @param string $rev_body The review text
 	 */
 	function submit_review($uid, $bnum, $rev_title, $rev_body) {
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		if ($uid && $bnum && $rev_title && $rev_body) {
 			$db =& MDB2::connect($this->dsn);
 			$next_rid = $db->nextID('insurge_reviews');
@@ -281,7 +281,7 @@ class insurge_client extends insurge {
 	 */
 	function get_reviews($uid = NULL, $bnum_arr = NULL, $rev_id_arr = NULL, $limit = 10, $offset = 0, $order = 'ORDER BY rev_create_date DESC') {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
 		if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
 		if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
@@ -289,11 +289,11 @@ class insurge_client extends insurge {
 		
 		$sql = 'SELECT count(*) FROM insurge_reviews WHERE ' . $where_str;
 		$dbq = $db->query($sql);
-		$reviews[total] = $dbq->fetchOne();
+		$reviews['total'] = $dbq->fetchOne();
 		
 		$sql = 'SELECT rev_id, group_id, uid, bnum, rev_title, rev_body, UNIX_TIMESTAMP(rev_last_update) AS rev_last_update, UNIX_TIMESTAMP(rev_create_date) AS rev_create_date FROM insurge_reviews WHERE ' . $where_str . ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$dbq = $db->query($sql);
-		$reviews[reviews] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+		$reviews['reviews'] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
 		
 		return $reviews;
 	}
@@ -327,7 +327,7 @@ class insurge_client extends insurge {
 	 */
 	function check_reviewed($uid, $bnum) {
 		$db =& MDB2::connect($this->dsn);
-		$group_id = $this->insurge_config[repository_info][group_id];
+		$group_id = $this->insurge_config['repository_info']['group_id'];
 		$dbq = $db->query("SELECT COUNT(*) FROM insurge_reviews WHERE group_id = '$group_id' AND bnum = '$bnum' AND uid = '$uid'");
 		return $dbq->fetchOne();
 	}

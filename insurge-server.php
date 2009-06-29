@@ -37,7 +37,7 @@ class insurge_server extends insurge {
 		$vote_count = 0;
 		// First time through...
 		foreach ($item_tot_avg_arr as $item_tot_avg) {
-			$vote_count = $vote_count + $item_tot_avg[vote_count];
+			$vote_count = $vote_count + $item_tot_avg['vote_count'];
 		}
 		if (count($item_tot_avg_arr)) {
 			$vote_count_avg = $vote_count / count($item_tot_avg_arr);
@@ -50,7 +50,7 @@ class insurge_server extends insurge {
 		if ($vote_count_avg) {
 			$ratings_rank = array();
 			foreach ($item_tot_avg_arr as $item_tot_avg) {
-				$ratings_rank[$item_tot_avg[bnum]] = (($vote_count_avg * $avg_rating_total) + ($item_tot_avg[vote_count] * $item_tot_avg[avg_rating])) / ($vote_count_avg + $item_tot_avg[vote_count]);
+				$ratings_rank[$item_tot_avg['bnum']] = (($vote_count_avg * $avg_rating_total) + ($item_tot_avg['vote_count'] * $item_tot_avg['avg_rating'])) / ($vote_count_avg + $item_tot_avg['vote_count']);
 			}
 			unset($item_tot_avg_arr); // Free up the memory
 			foreach ($ratings_rank as $bnum => $rating) {
@@ -64,7 +64,7 @@ class insurge_server extends insurge {
 		$tag_arr = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
 		$tags = array();
 		foreach ($tag_arr as $tag_vals) {
-			$tags[$tag_vals[bnum]] .= ' ' . $tag_vals[tag];
+			$tags[$tag_vals['bnum']] .= ' ' . $tag_vals['tag'];
 		}
 		unset($tag_arr); // Free up the memory
 		foreach ($tags as $bnum => $tag) {
@@ -77,7 +77,7 @@ class insurge_server extends insurge {
 		$rev_arr = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
 		$rev = array();
 		foreach ($rev_arr as $rev_vals) {
-			$rev[$rev_vals[bnum]] .= ' ' . $rev_vals[rev_title] . ' ' . $rev_vals[rev_body];
+			$rev[$rev_vals['bnum']] .= ' ' . $rev_vals['rev_title'] . ' ' . $rev_vals['rev_body'];
 		}
 		unset ($rev_arr); // Free up the memory
 		foreach ($rev as $bnum => $rev_text) {
