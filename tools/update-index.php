@@ -4,8 +4,6 @@
 // Init scripts, library locations, and binaries
 $locum_lib_dir = '/usr/local/lib/locum';
 $insurge_lib_dir = '/usr/local/lib/insurge';
-$mysql_init_script = '/etc/init.d/mysql';
-$sphinx_init_script = '/etc/init.d/sphinx';
 $sphinx_indexer = '/usr/local/sphinx/bin/indexer';
 
 // Include the libraries
