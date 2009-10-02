@@ -14,27 +14,27 @@
  */
 class insurge {
 
-	public $insurge_config;
-	public $db;
-	public $dsn;
+  public $insurge_config;
+  public $db;
+  public $dsn;
 
-	/**
-	 * Locum constructor.
-	 * This function prepares Locum for activity.
-	 */
-	public function __construct() {
-		if (function_exists('insurge_constructor_override')) {
-		  insurge_constructor_override($this);
-		  return;
-		}
-		
-		ini_set('memory_limit','128M');
-		$this->insurge_config = parse_ini_file('config/insurge.ini', true);
+  /**
+   * Locum constructor.
+   * This function prepares Locum for activity.
+   */
+  public function __construct() {
+    if (function_exists('insurge_constructor_override')) {
+      insurge_constructor_override($this);
+      return;
+    }
+    
+    ini_set('memory_limit','128M');
+    $this->insurge_config = parse_ini_file('config/insurge.ini', true);
 
-		// Take care of requirements
-		require_once('MDB2.php');
-		require($this->insurge_config['insurge_config']['dsn_file']);
-		$this->dsn = $dsn;
-	}
+    // Take care of requirements
+    require_once('MDB2.php');
+    require($this->insurge_config['insurge_config']['dsn_file']);
+    $this->dsn = $dsn;
+  }
 
 }
