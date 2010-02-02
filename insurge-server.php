@@ -59,6 +59,14 @@ class insurge_server extends insurge {
       }
     }
     
+    /* TODO:
+    <eby> jblyberg: tag and review indexing can be done in single sql statements i think
+    <eby> UPDATE insurge_index, (SELECT bnum, group_concat(rev_title,' ',rev_body) as review FROM insurge_reviews GROUP BY bnum) as temprev
+          SET insurge_index.review_idx = temprev.review WHERE insurge_index.bnum = temprev.bnum
+    <eby> UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags GROUP BY bnum) as tagtemp SET
+          insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum
+    */
+    
     // Now for the tags.
     $dbq = $db->query("SELECT bnum, tag FROM insurge_tags");
     $tag_arr = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
