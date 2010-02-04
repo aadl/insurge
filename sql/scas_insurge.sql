@@ -20,7 +20,7 @@ USE scas;
 -- 
 
 CREATE TABLE IF NOT EXISTS `insurge_index` (
-  `bnum` varchar(12) NOT NULL,
+  `bnum` int(12) NOT NULL,
   `rating_idx` int(8) NOT NULL default '0',
   `tag_idx` text,
   `review_idx` text,
