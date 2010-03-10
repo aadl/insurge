@@ -351,6 +351,11 @@ class insurge_client extends insurge {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
+    
+    $sql = "SELECT * FROM insurge_history WHERE " . $where_str . $where_prefix . " ORDER BY codate DESC, hist_id DESC";
+    $dbq = $db->query($sql);
+    $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+    return $result;
   }
   
   /**
