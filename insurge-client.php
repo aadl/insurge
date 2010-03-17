@@ -26,7 +26,7 @@ class insurge_client extends insurge {
   public function submit_tags($uid, $bnum, $tag_string) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
-    $tag_arr = self::prepare_tag_string($tag_string);
+    $tag_arr = $this->prepare_tag_string($tag_string);
     
     $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
@@ -64,7 +64,7 @@ class insurge_client extends insurge {
     if ($offset) { $sql .= " OFFSET $offset"; }
     $result =& $db->query($sql);
     $tag_result = $result->fetchAll(MDB2_FETCHMODE_ASSOC);
-    if ($rand) { self::shuffle_with_keys(&$tag_result); }
+    if ($rand) { $this->shuffle_with_keys(&$tag_result); }
     return $tag_result;
   }
   
