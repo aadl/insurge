@@ -8,6 +8,7 @@
  */
 
 require_once('insurge.php');
+require_once('vendor/MachineTag.php');
 
 /**
  * The insurge client class provides the front-end functionality for accessing
