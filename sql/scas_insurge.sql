@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `insurge_history` (
   `added` datetime NOT NULL
   PRIMARY KEY  (`hist_id`),
   KEY `repos_id` (`repos_id`,`group_id`,`uid`,`bnum`,`codate`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Tracks patron check-out history';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Tracks patron check-out history';
 
 -- --------------------------------------------------------
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `insurge_index` (
   `tag_idx` text,
   `review_idx` text,
   PRIMARY KEY  (`bnum`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `insurge_ratings` (
   KEY `uid` (`uid`),
   KEY `bnum` (`bnum`),
   KEY `rating` (`rating`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `insurge_reviews` (
   KEY `uid` (`uid`),
   KEY `bnum` (`bnum`),
   KEY `repos_id` (`repos_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -113,4 +113,4 @@ CREATE TABLE IF NOT EXISTS `insurge_tags` (
   KEY `bnum` (`bnum`),
   KEY `tag` (`tag`),
   KEY `group_id` (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
