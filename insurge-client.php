@@ -25,6 +25,10 @@ class insurge_client extends insurge {
    * @param string $tag_string A raw, unformatted string of tags to be processed.
    */
   public function submit_tags($uid, $bnum, $tag_string) {
+    $namespace = "''";
+    $predicate = "''";
+    $value = "''";
+    
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $tag_arr = $this->prepare_tag_string($tag_string);
@@ -34,11 +38,22 @@ class insurge_client extends insurge {
     foreach ($tag_arr as $tag) {
       if (!in_array($tag, $existing_tags)){
         $next_tid = $db->nextID('insurge_tags');
+        // Check tag if it matches namespace:predicate=value format
+        $mtag = new MachineTag($tag);
+        if($mtag->is_machinetag()) {
+          $namespace = $mtag->namespace();
+          $predicate = $mtag->predicate();
+          $value = $mtag->value();
+          $namespace = $db->quote($namespace, 'text');
+          $predicate = $db->quote($predicate, 'text');
+          $value = $db->quote($value, 'text');
+        }
+
         $tag = $db->quote($tag, 'text');
         if ($group_id) {
           $repos_id = $group_id . '-' . $next_tid;
         }
-        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, '$repos_id', '$group_id', $uid, $bnum, $tag, NOW())";
+        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, NOW())";
         $res =& $db->exec($sql);
       }
     }
