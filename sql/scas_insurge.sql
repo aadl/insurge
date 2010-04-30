@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `insurge_tags` (
   `repos_id` char(24) default NULL,
   `group_id` char(12) default NULL,
   `uid` varchar(12) default NULL,
-  `bnum` int(12) NOT NULL,
+  `content_id` int(12) NOT NULL,
   `tag` varchar(256) NOT NULL,
   `namespace` varchar(256) NOT NULL,
   `predicate` varchar(256) NOT NULL,
