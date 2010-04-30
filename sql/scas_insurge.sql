@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `insurge_tags` (
   `predicate` varchar(256) NOT NULL,
   `value` varchar(256) NOT NULL,
   `tag_date` datetime NOT NULL,
+  `public` bit(1) NOT NULL default b'1',
   PRIMARY KEY  (`tid`),
   KEY `repos_id` (`repos_id`),
   KEY `uid` (`uid`),
