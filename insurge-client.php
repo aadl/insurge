@@ -64,17 +64,18 @@ class insurge_client extends insurge {
    * Grabs an array of tags and their totals (weights).
    * 
    * @param int $uid Unique user ID
-   * @param array $bnum_arr Optional array of bib numbers to scope tag retrieval on.
+   * @param array $content_id_arr Optional array of unique content ids to scope tag retrieval on.
    * @param string $limit Limit the number of results returned.
    */
-  public function get_tag_totals($uid = NULL, $bnum_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC') {
+  public function get_tag_totals($uid = NULL, $content_id_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC', $public = 1) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $where_prefix = 'WHERE';
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if ($tag_name) { $where_str .= ' ' . $where_prefix . ' tag = ' . $db->quote($tag_name, 'text'); $where_prefix = 'AND'; }
-    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
+    if (count($content_id_arr)) { $where_str .= ' ' . $where_prefix . ' content_id IN (' . implode(', ', $content_id_arr) . ') '; $where_prefix = 'AND'; }
+    $where_str .= ' ' . $where_prefix . ' public = ' $public;
     $sql = 'SELECT tag, count(tag) AS count FROM insurge_tags ' . $where_str . ' GROUP BY tag ' . $order;
     if ($limit) { $sql .= " LIMIT $limit"; }
     if ($offset) { $sql .= " OFFSET $offset"; }
