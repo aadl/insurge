@@ -21,10 +21,10 @@ class insurge_client extends insurge {
    * Submits a bibliographic tags to the database.
    *
    * @param int $uid Unique user ID
-   * @param array $bnum_arr Optional array of bib numbers to scope tag retrieval on.
+   * @param int $content_id Unique identifier for content.
    * @param string $tag_string A raw, unformatted string of tags to be processed.
    */
-  public function submit_tags($uid, $bnum, $tag_string) {
+  public function submit_tags($uid, $content_id, $tag_string, $public = 1) {
     $namespace = "''";
     $predicate = "''";
     $value = "''";
@@ -33,7 +33,7 @@ class insurge_client extends insurge {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $tag_arr = $this->prepare_tag_string($tag_string);
     
-    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
+    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE content_id = ' . $content_id . ' AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
     foreach ($tag_arr as $tag) {
       if (!in_array($tag, $existing_tags)){
@@ -53,7 +53,7 @@ class insurge_client extends insurge {
         if ($group_id) {
           $repos_id = $group_id . '-' . $next_tid;
         }
-        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, NOW())";
+        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $content_id, $tag, $namespace, $predicate, $value, NOW(), $public)";
         $res =& $db->exec($sql);
       }
     }
