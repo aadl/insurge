@@ -21,10 +21,10 @@ class insurge_client extends insurge {
    * Submits a bibliographic tags to the database.
    *
    * @param int $uid Unique user ID
-   * @param int $content_id Unique identifier for content.
+   * @param int $bnum Unique identifier for content.
    * @param string $tag_string A raw, unformatted string of tags to be processed.
    */
-  public function submit_tags($uid, $content_id, $tag_string, $public = 1) {
+  public function submit_tags($uid, $bnum, $tag_string, $public = 1) {
     $namespace = "''";
     $predicate = "''";
     $value = "''";
@@ -33,7 +33,7 @@ class insurge_client extends insurge {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $tag_arr = $this->prepare_tag_string($tag_string);
     
-    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE content_id = ' . $content_id . ' AND uid = ' . $uid);
+    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
     foreach ($tag_arr as $tag) {
       if (!in_array($tag, $existing_tags)){
@@ -53,7 +53,7 @@ class insurge_client extends insurge {
         if ($group_id) {
           $repos_id = $group_id . '-' . $next_tid;
         }
-        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $content_id, $tag, $namespace, $predicate, $value, NOW(), $public)";
+        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, NOW(), $public)";
         $res =& $db->exec($sql);
       }
     }
@@ -64,17 +64,17 @@ class insurge_client extends insurge {
    * Grabs an array of tags and their totals (weights).
    * 
    * @param int $uid Unique user ID
-   * @param array $content_id_arr Optional array of unique content ids to scope tag retrieval on.
+   * @param array $bnum_arr Optional array of unique content ids to scope tag retrieval on.
    * @param string $limit Limit the number of results returned.
    */
-  public function get_tag_totals($uid = NULL, $content_id_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC', $public = 1) {
+  public function get_tag_totals($uid = NULL, $bnum_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC', $public = 1) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $where_prefix = 'WHERE';
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if ($tag_name) { $where_str .= ' ' . $where_prefix . ' tag = ' . $db->quote($tag_name, 'text'); $where_prefix = 'AND'; }
-    if (count($content_id_arr)) { $where_str .= ' ' . $where_prefix . ' content_id IN (' . implode(', ', $content_id_arr) . ') '; $where_prefix = 'AND'; }
+    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
     $where_str .= ' ' . $where_prefix . ' public = ' $public;
     $sql = 'SELECT tag, count(tag) AS count FROM insurge_tags ' . $where_str . ' GROUP BY tag ' . $order;
     if ($limit) { $sql .= " LIMIT $limit"; }
