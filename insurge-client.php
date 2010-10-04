@@ -16,7 +16,7 @@ require_once('vendor/MachineTag.php');
  * using this class.
  */
 class insurge_client extends insurge {
-  
+
   /**
    * Submits a bibliographic tags to the database.
    *
@@ -28,11 +28,11 @@ class insurge_client extends insurge {
     $namespace = "''";
     $predicate = "''";
     $value = "''";
-    
+
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $tag_arr = $this->prepare_tag_string($tag_string);
-    
+
     $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
     foreach ($tag_arr as $tag) {
@@ -57,12 +57,12 @@ class insurge_client extends insurge {
         $res =& $db->exec($sql);
       }
     }
-    
+
   }
-  
+
   /**
    * Grabs an array of tags and their totals (weights).
-   * 
+   *
    * @param int $uid Unique user ID
    * @param array $bnum_arr Optional array of unique content ids to scope tag retrieval on.
    * @param string $limit Limit the number of results returned.
@@ -75,7 +75,7 @@ class insurge_client extends insurge {
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if ($tag_name) { $where_str .= ' ' . $where_prefix . ' tag = ' . $db->quote($tag_name, 'text'); $where_prefix = 'AND'; }
     if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
-    $where_str .= ' ' . $where_prefix . ' public = ' $public;
+    $where_str .= ' ' . $where_prefix . ' public = ' . $public;
     $sql = 'SELECT tag, count(tag) AS count FROM insurge_tags ' . $where_str . ' GROUP BY tag ' . $order;
     if ($limit) { $sql .= " LIMIT $limit"; }
     if ($offset) { $sql .= " OFFSET $offset"; }
@@ -84,7 +84,7 @@ class insurge_client extends insurge {
     if ($rand) { $this->shuffle_with_keys(&$tag_result); }
     return $tag_result;
   }
-  
+
   public function get_tagged_items($uid = NULL, $tag_name = NULL, $limit = 500, $offset = 0) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
@@ -92,11 +92,11 @@ class insurge_client extends insurge {
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if ($tag_name) { $where_str .= ' ' . $where_prefix . ' tag = ' . $db->quote($tag_name, 'text'); $where_prefix = 'AND'; }
-    
+
     $sql = 'SELECT count(*) FROM insurge_tags ' . $where_str;
     $dbq = $db->query($sql);
     $tag_result['total'] = $dbq->fetchOne();
-    
+
     $sql = 'SELECT bnum FROM insurge_tags ' . $where_str;
     if ($limit) { $sql .= " LIMIT $limit"; }
     if ($offset) { $sql .= " OFFSET $offset"; }
@@ -104,9 +104,9 @@ class insurge_client extends insurge {
     $tag_result['bnums'] = $result->fetchCol();
     return $tag_result;
   }
-  
+
   /**
-   * Takes a string of raw tag input and parses it into an array, ready to be processed 
+   * Takes a string of raw tag input and parses it into an array, ready to be processed
    * into the database.
    *
    * @param string $raw_tag_string Raw tag input from an application.
@@ -126,7 +126,7 @@ class insurge_client extends insurge {
 
       if ($sToken === FALSE) {
         $cPhraseQuote = NULL;
-      } else {    
+      } else {
         if ($cPhraseQuote !== NULL) {
           if (substr($sToken, -1, 1) === $cPhraseQuote) {
             if (strlen($sToken) > 1) $sPhrase .= ((strlen($sPhrase) > 0)? ' ' : NULL) . substr($sToken, 0, -1);
@@ -181,12 +181,17 @@ class insurge_client extends insurge {
       $group_id = $this->insurge_config['repository_info']['group_id'];
       $db =& MDB2::connect($this->dsn);
       $tag = $db->quote($tag);
-      $sql = "DELETE FROM insurge_tags WHERE uid = $uid AND group_id = '$group_id' AND tag = $tag";
-      if ($bnum) { $sql .= " AND bnum = '$bnum'"; }
+      $sql = "DELETE FROM insurge_tags WHERE uid = $uid AND tag = $tag";
+      if ($bnum) {
+        $sql .= " AND bnum = '$bnum'";
+      }
+      if ($group_id) {
+        $sql .= " AND group_id = '$group_id'";
+      }
       $db->exec($sql);
     }
   }
-  
+
   /**
    * Submits a bibliographic rating to the database.
    *
@@ -236,7 +241,7 @@ class insurge_client extends insurge {
     $dbq =& $db->query($sql);
     $avg_rating = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC);
     $rating['count'] = $avg_rating['rate_count'];
-    
+
     if($avg_rating['rating'] >= ($half = ($ceil = ceil($avg_rating['rating']))- 0.5) + 0.25) {
       $rating['value'] = $ceil;
     } else if ($avg_rating['rating'] < $half - 0.25) {
@@ -246,7 +251,7 @@ class insurge_client extends insurge {
     }
     return $rating;
   }
-  
+
   function get_rating_list($uid = NULL, $bnum = NULL, $limit = 20, $offset = 0, $order = 'ORDER BY rating DESC') {
     $db =& MDB2::connect($this->dsn);
     $offset = $offset ? $offset : 0;
@@ -303,15 +308,19 @@ class insurge_client extends insurge {
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
     if (count($rev_id_arr)) { $where_str .= ' ' . $where_prefix . ' rev_id IN (' . implode(', ', $rev_id_arr) . ') '; $where_prefix = 'AND'; }
-    
+
     $sql = 'SELECT count(*) FROM insurge_reviews WHERE ' . $where_str;
     $dbq = $db->query($sql);
-    $reviews['total'] = $dbq->fetchOne();
-    
+    if (!PEAR::isError($dbq)) {
+      $reviews['total'] = $dbq->fetchOne();
+    }
+
     $sql = 'SELECT rev_id, group_id, uid, bnum, rev_title, rev_body, UNIX_TIMESTAMP(rev_last_update) AS rev_last_update, UNIX_TIMESTAMP(rev_create_date) AS rev_create_date FROM insurge_reviews WHERE ' . $where_str . ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
     $dbq = $db->query($sql);
-    $reviews['reviews'] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
-    
+    if (!PEAR::isError($dbq)) {
+      $reviews['reviews'] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+    }
+
     return $reviews;
   }
 
@@ -325,7 +334,7 @@ class insurge_client extends insurge {
       $db->exec($sql);
     }
   }
-  
+
   function delete_review($uid, $rev_id) {
     $db =& MDB2::connect($this->dsn);
     if ($uid && $rev_id) {
@@ -348,7 +357,7 @@ class insurge_client extends insurge {
     $dbq = $db->query("SELECT COUNT(*) FROM insurge_reviews WHERE group_id = '$group_id' AND bnum = '$bnum' AND uid = '$uid'");
     return $dbq->fetchOne();
   }
-  
+
   function add_checkout_history($uid, $bnum, $co_date, $title, $author) {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid && $bnum && $co_date) {
@@ -363,18 +372,113 @@ class insurge_client extends insurge {
       $db->exec($sql);
     }
   }
-  
+
   function get_checkout_history($uid = NULL, $limit = NULL, $offset = NULL) {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
-    
+
     $sql = "SELECT * FROM insurge_history WHERE " . $where_str . $where_prefix . " ORDER BY codate DESC, hist_id DESC";
     $dbq = $db->query($sql);
     $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
     return $result;
   }
-  
+
+  function get_list_items($list_id = 0, $field = 'value', $sort = 'ASC') {
+    if (empty($field)) {
+      $field = 'value';
+    }
+    if (empty($sort)) {
+      $sort = 'ASC';
+    }
+    // lists are stored in Machine Tags with the format "list#:place=X", where # is the list ID, and place is the item's position in the list
+    if ($list_id = intval($list_id)) {
+      $namespace = "list$list_id";
+      if ($field == 'value') {
+        $field = '(value+0)';
+      }
+      $sql = "SELECT * FROM insurge_tags, locum_bib_items " .
+             "WHERE namespace = '$namespace' " .
+             "AND insurge_tags.bnum = locum_bib_items.bnum " .
+             "ORDER BY $field $sort";
+      $db =& MDB2::connect($this->dsn);
+      $dbq = $db->query($sql);
+      $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+    }
+    else {
+      $result = FALSE;
+    }
+    return $result;
+  }
+
+  function add_list_item($uid, $list_id, $bnum) {
+    $db =& MDB2::connect($this->dsn);
+    $namespace = 'list' . $list_id;
+    $dbq = $db->query("SELECT MAX(value+0) FROM insurge_tags WHERE namespace = '$namespace' AND predicate = 'place'");
+    $max = $dbq->fetchOne();
+    $place = $max + 1;
+    $tag = "$namespace:place=$place";
+    self::submit_tags($uid, $bnum, $tag, 0);
+  }
+
+  function move_list_item($list_id, $cur_pos, $new_pos) {
+    $db =& MDB2::connect($this->dsn);
+    $namespace = 'list' . $list_id;
+
+    // Make sure $new_pos is within the current list limits
+    $dbq = $db->query("SELECT MIN(value+0) AS min, MAX(value+0) AS max FROM insurge_tags WHERE namespace='$namespace'");
+    $limits = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC);
+    if ($new_pos < $limits['min']) {
+      $new_pos = $limits['min'];
+    }
+    else {
+      if ($new_pos > $limits['max']) {
+        $new_pos = $limits['max'];
+      }
+    }
+
+    // Move item to temp position
+    $db->query("UPDATE insurge_tags SET value = 'temp' WHERE namespace = '$namespace' AND predicate = 'place' AND value = '$cur_pos'");
+    // Adjust items in between
+    if ($cur_pos > $new_pos) {
+      // Moving item to lower spot in the list, move everything else up one spot
+      $db->query("UPDATE insurge_tags SET value = value+1 WHERE namespace = '$namespace' AND predicate = 'place' AND value+0 >= $new_pos AND value+0 < $cur_pos");
+    }
+    else if ($cur_pos < $new_pos) {
+      // Moving item to higher spot in the list, move everything else down one spot
+      $db->query("UPDATE insurge_tags SET value = value-1 WHERE namespace = '$namespace' AND predicate = 'place' AND value+0 <= $new_pos AND value+0 > $cur_pos");
+    }
+    // Move item from temp position to new position
+    $db->query("UPDATE insurge_tags SET value = '$new_pos' WHERE namespace = '$namespace' AND predicate = 'place' AND value = 'temp'");
+    // Update tag text based on values
+    $min = min($cur_pos, $new_pos);
+    $max = max($cur_pos, $new_pos);
+    if ($min > 0 && $max > 0) {
+      $db->query("UPDATE insurge_tags SET tag = CONCAT(namespace, ':', predicate, '=', value) WHERE namespace = '$namespace' AND value+0 BETWEEN $min AND $max");
+    }
+  }
+
+  // Reorder List based on array with keys corresponding to bnums values corresponding to new places
+  function reorder_list($list_id, $new_order = array()) {
+    $db =& MDB2::connect($this->dsn);
+    $namespace = 'list' . $list_id;
+    if (count($new_order)) {
+      foreach($new_order as $bnum => $new_pos) {
+        $new_tag = "$namespace:place=$new_pos";
+        $db->query("UPDATE insurge_tags SET tag = '$new_tag', value = '$new_pos' WHERE namespace = '$namespace' AND predicate = 'place' AND bnum = $bnum");
+      }
+    }
+  }
+
+  function delete_list_item($list_id, $place) {
+    $db =& MDB2::connect($this->dsn);
+    $namespace = 'list' . $list_id;
+
+    // Remove tag at the given place
+    $db->query("DELETE FROM insurge_tags WHERE namespace = '$namespace' AND predicate = 'place' AND value = '$place'");
+    // Move items in higher spot down by one
+    $db->query("UPDATE insurge_tags SET value = value-1 WHERE namespace = '$namespace' AND predicate = 'place' AND value > $place");
+  }
   /**
    * Takes a reference to an array and shuffles it, preserving keys.
    *
