@@ -414,11 +414,17 @@ class insurge_client extends insurge {
   function add_list_item($uid, $list_id, $bnum) {
     $db =& MDB2::connect($this->dsn);
     $namespace = 'list' . $list_id;
+    // Check if item is already on list
+    $dbq = $db->query("SELECT tid FROM insurge_tags WHERE namespace = '$namespace' AND bnum = $bnum");
+    if ($dbq->numRows()) {
+      return FALSE;
+    }
     $dbq = $db->query("SELECT MAX(value+0) FROM insurge_tags WHERE namespace = '$namespace' AND predicate = 'place'");
     $max = $dbq->fetchOne();
     $place = $max + 1;
     $tag = "$namespace:place=$place";
     self::submit_tags($uid, $bnum, $tag, 0);
+    return TRUE;
   }
 
   function move_list_item($list_id, $cur_pos, $new_pos) {
