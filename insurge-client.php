@@ -314,7 +314,7 @@ class insurge_client extends insurge {
     if (!PEAR::isError($dbq)) {
       $reviews['total'] = $dbq->fetchOne();
     }
-
+    if($where_str == '') { $where_str = "1"; }
     $sql = 'SELECT rev_id, group_id, uid, bnum, rev_title, rev_body, UNIX_TIMESTAMP(rev_last_update) AS rev_last_update, UNIX_TIMESTAMP(rev_create_date) AS rev_create_date FROM insurge_reviews WHERE ' . $where_str . ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
     $dbq = $db->query($sql);
     if (!PEAR::isError($dbq)) {
