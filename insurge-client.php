@@ -24,7 +24,7 @@ class insurge_client extends insurge {
    * @param int $bnum Unique identifier for content.
    * @param string $tag_string A raw, unformatted string of tags to be processed.
    */
-  public function submit_tags($uid, $bnum, $tag_string, $public = 1) {
+  public function submit_tags($uid, $bnum, $tag_string, $public = 1, $timestamp = NULL) {
     $namespace = "''";
     $predicate = "''";
     $value = "''";
@@ -32,6 +32,14 @@ class insurge_client extends insurge {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $tag_arr = $this->prepare_tag_string($tag_string);
+
+    if ($timestamp) {
+      $tag_date = date('Y-m-d H:i:s', $timestamp);
+      $tag_date = "'$tag_date'";
+    }
+    else {
+      $tag_date = 'NOW()';
+    }
 
     $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
@@ -53,7 +61,7 @@ class insurge_client extends insurge {
         if ($group_id) {
           $repos_id = $group_id . '-' . $next_tid;
         }
-        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, NOW(), $public)";
+        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, $tag_date, $public)";
         $res =& $db->exec($sql);
       }
     }
@@ -400,7 +408,7 @@ class insurge_client extends insurge {
       $sql = "SELECT * FROM insurge_tags, locum_bib_items " .
              "WHERE namespace = '$namespace' " .
              "AND insurge_tags.bnum = locum_bib_items.bnum " .
-             "ORDER BY $field $sort";
+             "ORDER BY $field $sort, (value+0) $sort";
       $db =& MDB2::connect($this->dsn);
       $dbq = $db->query($sql);
       $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
@@ -411,7 +419,7 @@ class insurge_client extends insurge {
     return $result;
   }
 
-  function add_list_item($uid, $list_id, $bnum) {
+  function add_list_item($uid, $list_id, $bnum, $timestamp = NULL) {
     $db =& MDB2::connect($this->dsn);
     $namespace = 'list' . $list_id;
     // Check if item is already on list
@@ -423,7 +431,7 @@ class insurge_client extends insurge {
     $max = $dbq->fetchOne();
     $place = $max + 1;
     $tag = "$namespace:place=$place";
-    self::submit_tags($uid, $bnum, $tag, 0);
+    self::submit_tags($uid, $bnum, $tag, 0, $timestamp);
     return TRUE;
   }
 
