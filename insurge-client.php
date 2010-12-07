@@ -419,6 +419,20 @@ class insurge_client extends insurge {
     return $result;
   }
 
+  function get_item_list_ids($bnum) {
+    $list_ids = array();
+
+    $db =& MDB2::connect($this->dsn);
+    $dbq = $db->query("SELECT * FROM insurge_tags WHERE namespace LIKE 'list%' and bnum = $bnum");
+    while ($tag = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+print_r($tag);
+      $list_id = str_replace('list', '', $tag['namespace']);
+      $list_ids[] = $list_id;
+    }
+
+    return $list_ids;
+  }
+
   function add_list_item($uid, $list_id, $bnum, $timestamp = NULL) {
     $db =& MDB2::connect($this->dsn);
     $namespace = 'list' . $list_id;
@@ -493,6 +507,7 @@ class insurge_client extends insurge {
     // Move items in higher spot down by one
     $db->query("UPDATE insurge_tags SET value = value-1 WHERE namespace = '$namespace' AND predicate = 'place' AND value > $place");
   }
+
   /**
    * Takes a reference to an array and shuffles it, preserving keys.
    *
