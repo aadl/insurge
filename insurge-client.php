@@ -392,7 +392,7 @@ class insurge_client extends insurge {
     return $result;
   }
 
-  function get_list_items($list_id = 0, $field = 'value', $sort = 'ASC') {
+  function get_list_items($list_id = 0, $field = 'value', $sort = 'ASC', $search_term = '') {
     if (empty($field)) {
       $field = 'value';
     }
@@ -401,15 +401,24 @@ class insurge_client extends insurge {
     }
     // lists are stored in Machine Tags with the format "list#:place=X", where # is the list ID, and place is the item's position in the list
     if ($list_id = intval($list_id)) {
+      $db =& MDB2::connect($this->dsn);
       $namespace = "list$list_id";
       if ($field == 'value') {
         $field = '(value+0)';
       }
+      if ($search_term) {
+        $search_term = "'%". $db->escape($search_term) . "%'";
+        $search_sql = "AND (title LIKE $search_term " .
+                      "OR author LIKE $search_term " .
+                      "OR callnum LIKE $search_term " .
+                      "OR notes LIKE $search_term " .
+                      "OR subjects LIKE $search_term) ";
+      }
       $sql = "SELECT * FROM insurge_tags, locum_bib_items " .
              "WHERE namespace = '$namespace' " .
              "AND insurge_tags.bnum = locum_bib_items.bnum " .
+             $search_sql .
              "ORDER BY $field $sort, (value+0) $sort";
-      $db =& MDB2::connect($this->dsn);
       $dbq = $db->query($sql);
       $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
     }
