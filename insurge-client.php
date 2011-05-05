@@ -41,7 +41,7 @@ class insurge_client extends insurge {
       $tag_date = 'NOW()';
     }
 
-    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = ' . $bnum . ' AND uid = ' . $uid);
+    $dbq = $db->query('SELECT DISTINCT(tag) FROM insurge_tags WHERE bnum = "' . $bnum . '" AND uid = ' . $uid);
     $existing_tags = $dbq->fetchCol();
     foreach ($tag_arr as $tag) {
       if (!in_array($tag, $existing_tags)){
@@ -61,7 +61,7 @@ class insurge_client extends insurge {
         if ($group_id) {
           $repos_id = $group_id . '-' . $next_tid;
         }
-        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, $bnum, $tag, $namespace, $predicate, $value, $tag_date, $public)";
+        $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, '$bnum', $tag, $namespace, $predicate, $value, $tag_date, $public)";
         $res =& $db->exec($sql);
       }
     }
@@ -82,7 +82,7 @@ class insurge_client extends insurge {
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if ($tag_name) { $where_str .= ' ' . $where_prefix . ' tag = ' . $db->quote($tag_name, 'text'); $where_prefix = 'AND'; }
-    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
+    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN ("' . implode('", "', $bnum_arr) . '") '; $where_prefix = 'AND'; }
     $where_str .= ' ' . $where_prefix . ' public = ' . $public;
     $sql = 'SELECT tag, count(tag) AS count FROM insurge_tags ' . $where_str . ' GROUP BY tag ' . $order;
     if ($limit) { $sql .= " LIMIT $limit"; }
@@ -176,7 +176,7 @@ class insurge_client extends insurge {
       $where_prefix = 'AND';
       if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; }
       if ($tid) { $where_str .= ' ' . $where_prefix . ' tid = ' . $tid . ' '; }
-      if ($bnum) { $where_str .= ' ' . $where_prefix . ' bnum = ' . $bnum . ' '; }
+      if ($bnum) { $where_str .= ' ' . $where_prefix . ' bnum = "' . $bnum . '" '; }
       $tag = $db->quote($newtag, 'text');
       $oldtag = $db->quote($oldtag, 'text');
       $sql = "UPDATE insurge_tags SET tag = $tag WHERE tag = $oldtag " . $where_str;
@@ -213,21 +213,21 @@ class insurge_client extends insurge {
     if ($group_id) {
       $repos_id = $group_id . '-' . $next_tid;
     }
-    $sql = 'SELECT COUNT(rate_id) FROM insurge_ratings WHERE bnum = ' . $bnum . ' AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"';
-    $dbq =& $db->query('SELECT COUNT(rate_id) FROM insurge_ratings WHERE bnum = ' . $bnum . ' AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"');
+    $sql = 'SELECT COUNT(rate_id) FROM insurge_ratings WHERE bnum = "' . $bnum . '" AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"';
+    $dbq =& $db->query('SELECT COUNT(rate_id) FROM insurge_ratings WHERE bnum = "' . $bnum . '" AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"');
     $is_update = $dbq->fetchOne();
     if ($is_update > 1) {
-      $db->query('DELETE FROM insurge_ratings WHERE bnum = ' . $bnum . ' AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"');
+      $db->query('DELETE FROM insurge_ratings WHERE bnum = "' . $bnum . '" AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"');
       $is_update = FALSE;
     }
     if ($is_update) {
-      $sql = 'UPDATE insurge_ratings SET rating = ' . $value . ' WHERE bnum = ' . $bnum . ' AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"';
+      $sql = 'UPDATE insurge_ratings SET rating = ' . $value . ' WHERE bnum = "' . $bnum . '" AND uid = ' . $uid . ' AND group_id = "' . $group_id . '"';
     } else {
       $next_rid = $db->nextID('insurge_ratings');
       if ($group_id) {
         $repos_id = $group_id . '-' . $next_rid;
       }
-      $sql = "INSERT INTO insurge_ratings VALUES ($next_rid, '$repos_id', '$group_id', $uid, $bnum, $value, NOW())";
+      $sql = "INSERT INTO insurge_ratings VALUES ($next_rid, '$repos_id', '$group_id', $uid, '$bnum', $value, NOW())";
     }
     $res =& $db->exec($sql);
   }
@@ -242,7 +242,7 @@ class insurge_client extends insurge {
   function get_rating($bnum, $local_only = FALSE) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
-    $sql = 'SELECT AVG(rating) AS rating, COUNT(rate_id) AS rate_count FROM insurge_ratings WHERE bnum = ' . $bnum;
+    $sql = 'SELECT AVG(rating) AS rating, COUNT(rate_id) AS rate_count FROM insurge_ratings WHERE bnum = "' . $bnum .'"';
     if ($local_only) {
       $sql .= ' AND group_id = "' . $group_id . '"';
     }
@@ -265,7 +265,7 @@ class insurge_client extends insurge {
     $offset = $offset ? $offset : 0;
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
-    if ($bnum) { $where_str .= ' ' . $where_prefix . ' bnum = ' . $bnum . ' '; $where_prefix = 'AND'; }
+    if ($bnum) { $where_str .= ' ' . $where_prefix . ' bnum = "' . $bnum . '" '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     $sql = 'SELECT count(*) FROM insurge_ratings WHERE ' . $where_str;
     $dbq = $db->query($sql);
@@ -295,7 +295,7 @@ class insurge_client extends insurge {
       $title_ready = $db->quote($rev_title, 'text');
       $rev_body = strip_tags($rev_body, '<b><i><u><strong>');
       $body_ready = $db->quote($rev_body, 'text');
-      $sql = "INSERT INTO insurge_reviews VALUES ($next_rid, '$repos_id', '$group_id', '$uid', $bnum, $title_ready, $body_ready, NOW(), NOW())";
+      $sql = "INSERT INTO insurge_reviews VALUES ($next_rid, '$repos_id', '$group_id', '$uid', '$bnum', $title_ready, $body_ready, NOW(), NOW())";
       $db->exec($sql);
     }
   }
@@ -314,7 +314,7 @@ class insurge_client extends insurge {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
-    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN (' . implode(', ', $bnum_arr) . ') '; $where_prefix = 'AND'; }
+    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN ("' . implode('", "', $bnum_arr) . '") '; $where_prefix = 'AND'; }
     if (count($rev_id_arr)) { $where_str .= ' ' . $where_prefix . ' rev_id IN (' . implode(', ', $rev_id_arr) . ') '; $where_prefix = 'AND'; }
 
     $sql = 'SELECT count(*) FROM insurge_reviews WHERE ' . $where_str;
@@ -376,7 +376,7 @@ class insurge_client extends insurge {
       }
       $title_txt = $db->quote($rev_body, 'text');
       $author_txt = $db->quote($rev_body, 'text');
-      $sql = "INSERT INTO insurge_history VALUES ($next_hist_id, '$repos_id', '$group_id', $uid, $bnum, '$co_date', $title_txt, $author_txt)";
+      $sql = "INSERT INTO insurge_history VALUES ($next_hist_id, '$repos_id', '$group_id', $uid, '$bnum', '$co_date', $title_txt, $author_txt)";
       $db->exec($sql);
     }
   }
