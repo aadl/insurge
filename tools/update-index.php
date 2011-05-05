@@ -1,6 +1,6 @@
 #!/usr/bin/php5 -q
 <?php
-
+ini_set('memory_limit', '400M');
 // Init scripts, library locations, and binaries
 $locum_lib_dir = '/usr/local/lib/locum';
 $insurge_lib_dir = '/usr/local/lib/insurge';

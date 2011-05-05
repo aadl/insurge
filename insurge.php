@@ -28,7 +28,6 @@ class insurge {
       return;
     }
     
-    ini_set('memory_limit','128M');
     $this->insurge_config = parse_ini_file('config/insurge.ini', true);
 
     // Take care of requirements
