@@ -432,7 +432,7 @@ class insurge_client extends insurge {
     $list_ids = array();
 
     $db =& MDB2::connect($this->dsn);
-    $dbq = $db->query("SELECT * FROM insurge_tags WHERE namespace LIKE 'list%' and bnum = $bnum");
+    $dbq = $db->query("SELECT * FROM insurge_tags WHERE namespace LIKE 'list%' and bnum = $bnum ORDER BY tag_date DESC");
     while ($tag = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC)) {
       $list_id = str_replace('list', '', $tag['namespace']);
       $list_ids[] = $list_id;
