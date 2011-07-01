@@ -126,7 +126,7 @@ class insurge_client extends insurge {
     $sPhrase = NULL;
 
     // Define some constants
-    static $sTokens = " \r\n\t";  // Space, Return, Newline, Tab
+    static $sTokens = ", \r\n\t";  // Space, Return, Newline, Tab
     static $sQuotes = "'\"";    // Single and Double Quotes
 
     do {
