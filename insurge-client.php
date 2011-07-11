@@ -28,6 +28,7 @@ class insurge_client extends insurge {
     $namespace = "''";
     $predicate = "''";
     $value = "''";
+    $tids = array();
 
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
@@ -63,11 +64,20 @@ class insurge_client extends insurge {
         }
         $sql = "INSERT INTO insurge_tags VALUES ($next_tid, NULL, NULL, $uid, '$bnum', $tag, $namespace, $predicate, $value, $tag_date, $public)";
         $res =& $db->exec($sql);
+        $tids[] = $next_tid;
       }
     }
-
+    return $tids;
   }
 
+  public function get_tag($tid = 0) {
+    if ($tid) {
+      $db =& MDB2::connect($this->dsn);
+      $dbq = $db->query('SELECT * FROM insurge_tags WHERE tid = ' . $tid . ' LIMIT 1');
+      return $dbq->fetchRow(MDB2_FETCHMODE_ASSOC);
+    }
+  }
+  
   /**
    * Grabs an array of tags and their totals (weights).
    *
