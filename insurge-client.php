@@ -77,7 +77,7 @@ class insurge_client extends insurge {
       return $dbq->fetchRow(MDB2_FETCHMODE_ASSOC);
     }
   }
-  
+
   /**
    * Grabs an array of tags and their totals (weights).
    *
@@ -121,6 +121,16 @@ class insurge_client extends insurge {
     $result =& $db->query($sql);
     $tag_result['bnums'] = $result->fetchCol();
     return $tag_result;
+  }
+
+  public function get_tags($public = 1, $limit = 100, $offset = 0, $order = 'tid DESC') {
+    $db =& MDB2::connect($this->dsn);
+    $sql = "SELECT * FROM insurge_tags WHERE public = '$public' ORDER BY $order LIMIT $limit OFFSET $offset";
+    $dbq = $db->query($sql);
+    if (!PEAR::isError($dbq)) {
+      $tags = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+    }
+    return $tags;
   }
 
   /**
