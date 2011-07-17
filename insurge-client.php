@@ -329,7 +329,7 @@ class insurge_client extends insurge {
    * @param int $limit Result limiter
    * @param int $offset Result offset for purposes of paging
    */
-  function get_reviews($uid = NULL, $bnum_arr = NULL, $rev_id_arr = NULL, $limit = 10, $offset = 0, $order = 'ORDER BY rev_create_date DESC') {
+  function get_reviews($uid = NULL, $bnum_arr = NULL, $rev_id_arr = NULL, $limit = 20, $offset = 0, $order = 'ORDER BY rev_create_date DESC') {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
