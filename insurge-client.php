@@ -78,6 +78,18 @@ class insurge_client extends insurge {
     }
   }
 
+  public function get_machine_tags($bnum = NULL) {
+    if($bnum){
+      $db =& MDB2::connect($this->dsn);
+      $sql = "SELECT * FROM insurge_tags WHERE bnum = $bnum AND namespace != ''";
+      $dbq = $db->query($sql);
+      if (!PEAR::isError($dbq)) {
+        $tags = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
+      }
+      return $tags;
+    }
+  }
+
   /**
    * Grabs an array of tags and their totals (weights).
    *
@@ -450,7 +462,7 @@ class insurge_client extends insurge {
 
   function get_item_list_ids($bnum) {
     $list_ids = array();
-
+return $list_ids;
     $db =& MDB2::connect($this->dsn);
     $dbq = $db->query("SELECT * FROM insurge_tags WHERE namespace LIKE 'list%' and bnum = $bnum ORDER BY tag_date DESC");
     while ($tag = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC)) {
