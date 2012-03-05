@@ -479,7 +479,16 @@ return $list_ids;
     // Check if item is already on list
     $dbq = $db->query("SELECT tid FROM insurge_tags WHERE namespace = '$namespace' AND bnum = $bnum");
     if ($dbq->numRows()) {
-      return FALSE;
+      // if timestamp passed in, update the timestamp on the existing tag
+      if ($timestamp) {
+        $tid = $dbq->fetchOne();
+        $tag_date = date('Y-m-d H:i:s', $timestamp);
+        $dbq = $db->query("UPDATE insurge_tags SET tag_date = '$tag_date' WHERE tid = $tid");
+        return TRUE;
+      }
+      else {
+        return FALSE;
+      }
     }
     $dbq = $db->query("SELECT MAX(value+0) FROM insurge_tags WHERE namespace = '$namespace' AND predicate = 'place'");
     $max = $dbq->fetchOne();
