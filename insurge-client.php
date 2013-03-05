@@ -97,7 +97,7 @@ class insurge_client extends insurge {
    * @param array $bnum_arr Optional array of unique content ids to scope tag retrieval on.
    * @param string $limit Limit the number of results returned.
    */
-  public function get_tag_totals($uid = NULL, $bnum_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 500, $offset = 0, $order = 'ORDER BY count DESC', $public = 1) {
+  public function get_tag_totals($uid = NULL, $bnum_arr = NULL, $tag_name = NULL, $rand = TRUE, $limit = 100, $offset = 0, $order = 'ORDER BY count DESC', $public = 1) {
     $db =& MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $where_prefix = 'WHERE';
@@ -108,6 +108,7 @@ class insurge_client extends insurge {
     $where_str .= ' ' . $where_prefix . ' public = ' . $public;
     $sql = 'SELECT tag, count(tag) AS count FROM insurge_tags ' . $where_str . ' GROUP BY tag ' . $order;
     if ($limit) { $sql .= " LIMIT $limit"; }
+    else { $sql .= " LIMIT 20"; }
     if ($offset) { $sql .= " OFFSET $offset"; }
     $result =& $db->query($sql);
     $tag_result = $result->fetchAll(MDB2_FETCHMODE_ASSOC);
@@ -462,14 +463,14 @@ class insurge_client extends insurge {
 
   function get_item_list_ids($bnum) {
     $list_ids = array();
-return $list_ids;
     $db =& MDB2::connect($this->dsn);
-    $dbq = $db->query("SELECT * FROM insurge_tags WHERE namespace LIKE 'list%' and bnum = $bnum ORDER BY tag_date DESC");
+    $dbq = $db->query("SELECT namespace,predicate FROM insurge_tags WHERE bnum = '$bnum' ORDER BY tag_date DESC");
     while ($tag = $dbq->fetchRow(MDB2_FETCHMODE_ASSOC)) {
-      $list_id = str_replace('list', '', $tag['namespace']);
-      $list_ids[] = $list_id;
+      if($tag['predicate'] == 'place') {
+        $list_id = str_replace('list', '', $tag['namespace']);
+        $list_ids[] = $list_id;
+      }
     }
-
     return $list_ids;
   }
 
