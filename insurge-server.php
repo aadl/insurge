@@ -58,40 +58,12 @@ class insurge_server extends insurge {
         $db->exec("UPDATE insurge_index SET rating_idx = '$rating_prepped' WHERE bnum = '$bnum'");
       }
     }
-    
-    /* TODO:
-    <eby> jblyberg: tag and review indexing can be done in single sql statements i think
-    <eby> UPDATE insurge_index, (SELECT bnum, group_concat(rev_title,' ',rev_body) as review FROM insurge_reviews GROUP BY bnum) as temprev
-          SET insurge_index.review_idx = temprev.review WHERE insurge_index.bnum = temprev.bnum
-    <eby> UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags GROUP BY bnum) as tagtemp SET
-          insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum
-    */
-    
+        
     // Now for the tags.
-    $dbq = $db->query("SELECT bnum, tag FROM insurge_tags");
-    $tag_arr = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
-    $tags = array();
-    foreach ($tag_arr as $tag_vals) {
-      $tags[$tag_vals['bnum']] .= ' ' . $tag_vals['tag'];
-    }
-    unset($tag_arr); // Free up the memory
-    foreach ($tags as $bnum => $tag) {
-      $tag = $db->quote(trim($tag), 'text');
-      $db->exec("UPDATE insurge_index SET tag_idx = $tag WHERE bnum = '$bnum'");
-    }
+    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags GROUP BY bnum) as tagtemp SET insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum");
     
-    // And finally, the reviews.
-    $dbq = $db->query("SELECT bnum, rev_title, rev_body FROM insurge_reviews");
-    $rev_arr = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
-    $rev = array();
-    foreach ($rev_arr as $rev_vals) {
-      $rev[$rev_vals['bnum']] .= ' ' . $rev_vals['rev_title'] . ' ' . $rev_vals['rev_body'];
-    }
-    unset ($rev_arr); // Free up the memory
-    foreach ($rev as $bnum => $rev_text) {
-      $rev_text = $db->quote(trim($rev_text), 'text');
-      $db->exec("UPDATE insurge_index SET review_idx = $rev_text WHERE bnum = '$bnum'");
-    }
+    // And finally, the reviews.      
+    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(rev_title,' ',rev_body) as review FROM insurge_reviews GROUP BY bnum) as temprev SET insurge_index.review_idx = temprev.review WHERE insurge_index.bnum = temprev.bnum");
     
   }
   
