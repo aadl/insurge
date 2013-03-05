@@ -81,7 +81,7 @@ class insurge_client extends insurge {
   public function get_machine_tags($bnum = NULL) {
     if($bnum){
       $db =& MDB2::connect($this->dsn);
-      $sql = "SELECT * FROM insurge_tags WHERE bnum = $bnum AND namespace != ''";
+      $sql = "SELECT * FROM insurge_tags WHERE bnum = '$bnum' AND namespace != ''";
       $dbq = $db->query($sql);
       if (!PEAR::isError($dbq)) {
         $tags = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
