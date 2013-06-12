@@ -60,7 +60,7 @@ class insurge_server extends insurge {
     }
         
     // Now for the tags.
-    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags GROUP BY bnum) as tagtemp SET insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum");
+    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags WHERE public = 1 GROUP BY bnum) as tagtemp SET insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum");
     
     // And finally, the reviews.      
     $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(rev_title,' ',rev_body) as review FROM insurge_reviews GROUP BY bnum) as temprev SET insurge_index.review_idx = temprev.review WHERE insurge_index.bnum = temprev.bnum");
