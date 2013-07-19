@@ -349,7 +349,7 @@ class insurge_client extends insurge {
     if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
     if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN ("' . implode('", "', $bnum_arr) . '") '; $where_prefix = 'AND'; }
     if (count($rev_id_arr)) { $where_str .= ' ' . $where_prefix . ' rev_id IN (' . implode(', ', $rev_id_arr) . ') '; $where_prefix = 'AND'; }
-    if($where_str == '') {
+    if($where_str != '') {
       $sql = 'SELECT count(*) FROM insurge_reviews WHERE ' . $where_str;
       $dbq = $db->query($sql);
       if (!PEAR::isError($dbq)) {
