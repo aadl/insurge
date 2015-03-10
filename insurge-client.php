@@ -112,7 +112,7 @@ class insurge_client extends insurge {
     if ($offset) { $sql .= " OFFSET $offset"; }
     $result =& $db->query($sql);
     $tag_result = $result->fetchAll(MDB2_FETCHMODE_ASSOC);
-    if ($rand) { $this->shuffle_with_keys(&$tag_result); }
+    if ($rand) { $this->shuffle_with_keys($tag_result); }
     return $tag_result;
   }
 
