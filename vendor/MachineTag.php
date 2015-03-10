@@ -33,7 +33,7 @@ class MachineTag {
 			return $this->_mt;
 		}
 		
-		function namespace(){
+		function mt_namespace(){
 			return $this->_namespace;
 		}
 
