@@ -50,7 +50,7 @@ class insurge_client extends insurge {
         // Check tag if it matches namespace:predicate=value format
         $mtag = new MachineTag($tag);
         if($mtag->is_machinetag()) {
-          $namespace = $mtag->namespace();
+          $namespace = $mtag->mt_namespace();
           $predicate = $mtag->predicate();
           $value = $mtag->value();
           $namespace = $db->quote($namespace, 'text');
