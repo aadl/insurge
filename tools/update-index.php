@@ -1,6 +1,5 @@
 #!/usr/bin/php5 -q
 <?php
-ini_set('memory_limit', '400M');
 // Init scripts, library locations, and binaries
 $locum_lib_dir = '/usr/local/lib/locum';
 $insurge_lib_dir = '/usr/local/lib/insurge';
@@ -18,10 +17,10 @@ $insurge = new insurge_server;
 echo "Rebuilding Insurge index table... ";
 $insurge->rebuild_index_table();
 echo "Done.\n";
-echo "Rebuilding Facet Heap... ";
-$locum->rebuild_facet_heap();
-echo "Done.\n";
-echo "Rebuilding the Sphinx index... ";
-shell_exec($sphinx_indexer . '  --all --rotate');
+//echo "Rebuilding Facet Heap... ";
+//$locum->rebuild_facet_heap();
+//echo "Done.\n";
+//echo "Rebuilding the Sphinx index... ";
+//shell_exec($sphinx_indexer . '  --all --rotate');
 echo "Done.\n";
 echo "Finished with maintenance tasks.\n";

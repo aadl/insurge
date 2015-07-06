@@ -21,9 +21,12 @@ class insurge_server extends insurge {
   public function rebuild_index_table() {
     $db =& MDB2::connect($this->dsn);
     
-    // Reset the index table
-    $db->query('DELETE FROM insurge_index');
-    $db->query('INSERT INTO insurge_index (bnum) SELECT locum_bib_items.bnum FROM locum_bib_items');
+    // Now for the tags.
+    $db->exec("INSERT INTO insurge_index( bnum, tag_idx ) SELECT bnum, @tagidx := GROUP_CONCAT( tag SEPARATOR  ' ' ) FROM insurge_tags WHERE public = 1 GROUP BY bnum ON DUPLICATE KEY UPDATE insurge_index.tag_idx = @tagidx");
+    
+    // The reviews.      
+    $db->exec("INSERT INTO insurge_index(bnum, review_idx) SELECT bnum, @reviewidx := group_concat(rev_title,' ',rev_body) FROM insurge_reviews GROUP BY bnum ON DUPLICATE KEY UPDATE insurge_index.review_idx = @reviewidx");
+    
     
     // Do the ratings.
     
@@ -59,12 +62,6 @@ class insurge_server extends insurge {
       }
     }
         
-    // Now for the tags.
-    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(tag SEPARATOR ' ') as tag FROM insurge_tags WHERE public = 1 GROUP BY bnum) as tagtemp SET insurge_index.tag_idx = tagtemp.tag WHERE insurge_index.bnum = tagtemp.bnum");
-    
-    // And finally, the reviews.      
-    $db->exec("UPDATE insurge_index, (SELECT bnum, group_concat(rev_title,' ',rev_body) as review FROM insurge_reviews GROUP BY bnum) as temprev SET insurge_index.review_idx = temprev.review WHERE insurge_index.bnum = temprev.bnum");
-    
   }
   
 }
