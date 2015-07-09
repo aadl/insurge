@@ -136,14 +136,25 @@ class insurge_client extends insurge {
     return $tag_result;
   }
 
-  public function get_tags($public = 1, $limit = 100, $offset = 0, $order = 'tid DESC') {
+  public function get_tags($public = 1, $limit = 100, $offset = 0, $cutoff = 0, $order = 'tid DESC') {
+    $total_sql = "SELECT COUNT(*) FROM insurge_tags WHERE public = '$public'";
+    $sql = "SELECT * FROM insurge_tags WHERE public = '$public'";
+    if ($cutoff) {
+      $co_date = date('Y-m-d H:i:s', $cutoff);
+      $total_sql .= " AND tag_date > '" . $co_date . "'";
+      $sql .= " AND tag_date > '" . $co_date . "'";
+    }
+    $sql .= " ORDER BY $order LIMIT $limit OFFSET $offset";
     $db = MDB2::connect($this->dsn);
-    $sql = "SELECT * FROM insurge_tags WHERE public = '$public' ORDER BY $order LIMIT $limit OFFSET $offset";
+    $dbq = $db->query($total_sql);
+    if (!PEAR::isError($dbq)) {
+      $total = $dbq->fetchOne();
+    }
     $dbq = $db->query($sql);
     if (!PEAR::isError($dbq)) {
       $tags = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
     }
-    return $tags;
+    return array('total' => $total, 'tags' => $tags);
   }
 
   /**
@@ -342,22 +353,41 @@ class insurge_client extends insurge {
    * @param int $limit Result limiter
    * @param int $offset Result offset for purposes of paging
    */
-  function get_reviews($uid = NULL, $bnum_arr = NULL, $rev_id_arr = NULL, $limit = 20, $offset = 0, $order = 'ORDER BY rev_create_date DESC') {
+  function get_reviews($uid = NULL, $bnum_arr = NULL, $rev_id_arr = NULL, $limit = 20, $offset = 0, $order = 'ORDER BY rev_create_date DESC', $cutoff = 0) {
     $db = MDB2::connect($this->dsn);
     $group_id = $this->insurge_config['repository_info']['group_id'];
-    if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
-    if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
-    if (count($bnum_arr)) { $where_str .= ' ' . $where_prefix . ' bnum IN ("' . implode('", "', $bnum_arr) . '") '; $where_prefix = 'AND'; }
-    if (count($rev_id_arr)) { $where_str .= ' ' . $where_prefix . ' rev_id IN (' . implode(', ', $rev_id_arr) . ') '; $where_prefix = 'AND'; }
-    if($where_str != '') {
-      $sql = 'SELECT count(*) FROM insurge_reviews WHERE ' . $where_str;
-      $dbq = $db->query($sql);
-      if (!PEAR::isError($dbq)) {
-        $reviews['total'] = $dbq->fetchOne();
-      }
+
+    $count_sql = 'SELECT COUNT(*) FROM insurge_reviews WHERE 1';
+    $sql = 'SELECT rev_id, group_id, uid, bnum, rev_title, rev_body, ' .
+           'UNIX_TIMESTAMP(rev_last_update) AS rev_last_update, UNIX_TIMESTAMP(rev_create_date) AS rev_create_date ' .
+           'FROM insurge_reviews WHERE 1';
+
+    if ($uid) {
+      $count_sql .= ' AND uid = ' . $uid;
+      $sql .= ' AND uid = ' . $uid;
     }
-    if($where_str == '') { $where_str = "1"; }
-    $sql = 'SELECT rev_id, group_id, uid, bnum, rev_title, rev_body, UNIX_TIMESTAMP(rev_last_update) AS rev_last_update, UNIX_TIMESTAMP(rev_create_date) AS rev_create_date FROM insurge_reviews WHERE ' . $where_str . ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+    if ($group_id) {
+      $count_sql .= ' AND group_id = ' . $group_id;
+      $sql .= ' AND group_id = ' . $group_id;
+    }
+    if (count($bnum_arr)) {
+      $count_sql .= ' AND bnum IN ("' . implode('", "', $bnum_arr) . '") ';
+      $sql .= ' AND bnum IN ("' . implode('", "', $bnum_arr) . '") ';
+    }
+    if (count($rev_id_arr)) {
+      $count_sql .= ' AND rev_id IN (' . implode(', ', $rev_id_arr) . ') ';
+      $sql .= ' AND rev_id IN (' . implode(', ', $rev_id_arr) . ') ';
+    }
+    if ($cutoff) {
+      $count_sql .= ' AND rev_create_date > "' . $cutoff . '"';
+      $sql .= ' AND rev_create_date > "' . $cutoff . '"';
+    }
+
+    $dbq = $db->query($count_sql);
+    if (!PEAR::isError($dbq)) {
+      $reviews['total'] = $dbq->fetchOne();
+    }
+    $sql .= ' ' . $order . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
     $dbq = $db->query($sql);
     if (!PEAR::isError($dbq)) {
       $reviews['reviews'] = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
